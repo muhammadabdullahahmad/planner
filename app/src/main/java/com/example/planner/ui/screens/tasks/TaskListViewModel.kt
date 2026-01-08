@@ -9,6 +9,7 @@ import com.example.planner.data.repository.TaskRepository
 import com.example.planner.data.repository.UserRepository
 import com.example.planner.domain.model.*
 import com.example.planner.util.DateTimeUtils
+import com.example.planner.util.PasswordHasher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,7 +26,10 @@ data class TaskListUiState(
     val filter: TaskFilter = TaskFilter.ALL,
     val selectedCategory: Category? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val showPasswordDialog: Boolean = false,
+    val passwordError: Boolean = false,
+    val hasAdminPassword: Boolean = false
 )
 
 @HiltViewModel
@@ -42,6 +46,15 @@ class TaskListViewModel @Inject constructor(
 
     init {
         loadData()
+        checkAdminPassword()
+    }
+
+    private fun checkAdminPassword() {
+        viewModelScope.launch {
+            userPreferences.adminPasswordHash.collect { hash ->
+                _uiState.update { it.copy(hasAdminPassword = hash != null) }
+            }
+        }
     }
 
     private fun loadData() {
@@ -162,6 +175,32 @@ class TaskListViewModel @Inject constructor(
     fun deleteTask(taskId: Long) {
         viewModelScope.launch {
             taskRepository.deleteTask(taskId)
+        }
+    }
+
+    fun onCreateTaskClicked() {
+        if (_uiState.value.hasAdminPassword) {
+            _uiState.update { it.copy(showPasswordDialog = true, passwordError = false) }
+        }
+    }
+
+    fun dismissPasswordDialog() {
+        _uiState.update { it.copy(showPasswordDialog = false, passwordError = false) }
+    }
+
+    fun verifyAdminPassword(password: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            userPreferences.adminPasswordHash.first()?.let { storedHash ->
+                if (PasswordHasher.verify(password, storedHash)) {
+                    _uiState.update { it.copy(showPasswordDialog = false, passwordError = false) }
+                    onSuccess()
+                } else {
+                    _uiState.update { it.copy(passwordError = true) }
+                }
+            } ?: run {
+                _uiState.update { it.copy(showPasswordDialog = false) }
+                onSuccess()
+            }
         }
     }
 }

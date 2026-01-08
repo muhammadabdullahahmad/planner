@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.planner.ui.navigation.BottomNavItem
+import com.example.planner.ui.navigation.Screen
 
 @Composable
 fun PlannerBottomBar(
@@ -16,9 +17,16 @@ fun PlannerBottomBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Check if user is on child dashboard (to highlight Home correctly)
+    val isOnChildDashboard = currentRoute == Screen.ChildDashboard.route
+
     NavigationBar(modifier = modifier) {
         BottomNavItem.items.forEach { item ->
-            val selected = currentRoute == item.route
+            // For Dashboard item, also consider ChildDashboard as selected
+            val selected = when {
+                item == BottomNavItem.Dashboard && isOnChildDashboard -> true
+                else -> currentRoute == item.route
+            }
 
             NavigationBarItem(
                 icon = {
@@ -30,8 +38,15 @@ fun PlannerBottomBar(
                 label = { Text(item.title) },
                 selected = selected,
                 onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
+                    // If on child dashboard and clicking Home, stay on child dashboard
+                    val targetRoute = if (item == BottomNavItem.Dashboard && isOnChildDashboard) {
+                        Screen.ChildDashboard.route
+                    } else {
+                        item.route
+                    }
+
+                    if (currentRoute != targetRoute) {
+                        navController.navigate(targetRoute) {
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
                             }

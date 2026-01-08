@@ -67,10 +67,14 @@ fun SetupFamilyScreen(
                     adminName = uiState.adminName,
                     adminPin = uiState.adminPin,
                     confirmPin = uiState.confirmPin,
+                    adminPassword = uiState.adminPassword,
+                    confirmAdminPassword = uiState.confirmAdminPassword,
                     error = uiState.error,
                     onNameChange = viewModel::updateAdminName,
                     onPinChange = viewModel::updateAdminPin,
-                    onConfirmPinChange = viewModel::updateConfirmPin
+                    onConfirmPinChange = viewModel::updateConfirmPin,
+                    onAdminPasswordChange = viewModel::updateAdminPassword,
+                    onConfirmAdminPasswordChange = viewModel::updateConfirmAdminPassword
                 )
                 1 -> MembersSetupStep(
                     members = uiState.members,
@@ -93,73 +97,128 @@ private fun AdminSetupStep(
     adminName: String,
     adminPin: String,
     confirmPin: String,
+    adminPassword: String,
+    confirmAdminPassword: String,
     error: String?,
     onNameChange: (String) -> Unit,
     onPinChange: (String) -> Unit,
-    onConfirmPinChange: (String) -> Unit
+    onConfirmPinChange: (String) -> Unit,
+    onAdminPasswordChange: (String) -> Unit,
+    onConfirmAdminPasswordChange: (String) -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        Text(
-            text = "Welcome to Family Planner!",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        item {
+            Text(
+                text = "Welcome to Family Planner!",
+                style = MaterialTheme.typography.headlineSmall
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Let's set up your account first. As the admin, you'll be able to manage tasks and family members.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            Text(
+                text = "Let's set up your account first. As the admin, you'll be able to manage tasks and family members.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        OutlinedTextField(
-            value = adminName,
-            onValueChange = onNameChange,
-            label = { Text("Your Name") },
-            leadingIcon = {
-                Icon(Icons.Default.Person, contentDescription = null)
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = adminName,
+                onValueChange = onNameChange,
+                label = { Text("Your Name") },
+                leadingIcon = {
+                    Icon(Icons.Default.Person, contentDescription = null)
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = adminPin,
-            onValueChange = onPinChange,
-            label = { Text("Create PIN (4-6 digits)") },
-            leadingIcon = {
-                Icon(Icons.Default.Lock, contentDescription = null)
-            },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = adminPin,
+                onValueChange = onPinChange,
+                label = { Text("Create PIN (4-6 digits)") },
+                leadingIcon = {
+                    Icon(Icons.Default.Lock, contentDescription = null)
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = confirmPin,
-            onValueChange = onConfirmPinChange,
-            label = { Text("Confirm PIN") },
-            leadingIcon = {
-                Icon(Icons.Default.Lock, contentDescription = null)
-            },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            singleLine = true,
-            isError = error != null,
-            supportingText = error?.let { { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = confirmPin,
+                onValueChange = onConfirmPinChange,
+                label = { Text("Confirm PIN") },
+                leadingIcon = {
+                    Icon(Icons.Default.Lock, contentDescription = null)
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Admin Password (Optional)",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Set a password to prevent children from creating tasks without your approval.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = adminPassword,
+                onValueChange = onAdminPasswordChange,
+                label = { Text("Admin Password") },
+                leadingIcon = {
+                    Icon(Icons.Default.Security, contentDescription = null)
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = confirmAdminPassword,
+                onValueChange = onConfirmAdminPasswordChange,
+                label = { Text("Confirm Admin Password") },
+                leadingIcon = {
+                    Icon(Icons.Default.Security, contentDescription = null)
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                isError = error != null,
+                supportingText = error?.let { { Text(it) } },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

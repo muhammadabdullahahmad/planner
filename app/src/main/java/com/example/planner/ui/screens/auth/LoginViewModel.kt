@@ -17,7 +17,8 @@ data class LoginUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val isFirstLaunch: Boolean = true,
-    val loginSuccess: Boolean = false
+    val loginSuccess: Boolean = false,
+    val loggedInUserIsAdmin: Boolean = false
 )
 
 @HiltViewModel
@@ -79,7 +80,11 @@ class LoginViewModel @Inject constructor(
             if (isValid) {
                 userPreferences.setLoggedInUser(selectedUser.id)
                 userRepository.updateLastLogin(selectedUser.id, System.currentTimeMillis())
-                _uiState.update { it.copy(isLoading = false, loginSuccess = true) }
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    loginSuccess = true,
+                    loggedInUserIsAdmin = selectedUser.isAdmin
+                )}
             } else {
                 _uiState.update { it.copy(
                     isLoading = false,

@@ -26,7 +26,7 @@ import com.example.planner.ui.components.user.UserAvatar
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (isAdmin: Boolean) -> Unit,
     onSetupFamily: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -34,7 +34,7 @@ fun LoginScreen(
 
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
-            onLoginSuccess()
+            onLoginSuccess(uiState.loggedInUserIsAdmin)
         }
     }
 

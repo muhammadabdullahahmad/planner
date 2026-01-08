@@ -3,6 +3,7 @@ package com.example.planner.data.preferences
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -13,6 +14,7 @@ class UserPreferences @Inject constructor(
         private val LOGGED_IN_USER_ID = longPreferencesKey("logged_in_user_id")
         private val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_launch")
         private val REMEMBER_USER = booleanPreferencesKey("remember_user")
+        private val ADMIN_PASSWORD_HASH = stringPreferencesKey("admin_password_hash")
     }
 
     val loggedInUserId: Flow<Long?> = dataStore.data.map { preferences ->
@@ -53,5 +55,21 @@ class UserPreferences @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(LOGGED_IN_USER_ID)
         }
+    }
+
+    val adminPasswordHash: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[ADMIN_PASSWORD_HASH]
+    }
+
+    suspend fun setAdminPassword(passwordHash: String) {
+        dataStore.edit { preferences ->
+            preferences[ADMIN_PASSWORD_HASH] = passwordHash
+        }
+    }
+
+    suspend fun hasAdminPassword(): Boolean {
+        return dataStore.data.map { preferences ->
+            preferences[ADMIN_PASSWORD_HASH] != null
+        }.first()
     }
 }

@@ -9,6 +9,7 @@ import com.example.planner.data.repository.UserRepository
 import com.example.planner.domain.model.User
 import com.example.planner.domain.model.UserRole
 import com.example.planner.util.Constants
+import com.example.planner.util.PasswordHasher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,8 @@ data class SetupFamilyUiState(
     val adminName: String = "",
     val adminPin: String = "",
     val confirmPin: String = "",
+    val adminPassword: String = "",
+    val confirmAdminPassword: String = "",
     val members: List<FamilyMember> = emptyList(),
     val currentStep: Int = 0, // 0 = admin setup, 1 = add members, 2 = review
     val isLoading: Boolean = false,
@@ -64,6 +67,14 @@ class SetupFamilyViewModel @Inject constructor(
         }
     }
 
+    fun updateAdminPassword(password: String) {
+        _uiState.update { it.copy(adminPassword = password, error = null) }
+    }
+
+    fun updateConfirmAdminPassword(password: String) {
+        _uiState.update { it.copy(confirmAdminPassword = password, error = null) }
+    }
+
     fun nextStep() {
         val state = _uiState.value
 
@@ -81,6 +92,17 @@ class SetupFamilyViewModel @Inject constructor(
                 if (state.adminPin != state.confirmPin) {
                     _uiState.update { it.copy(error = "PINs don't match") }
                     return
+                }
+                // Validate admin password (optional but if entered, must match)
+                if (state.adminPassword.isNotEmpty()) {
+                    if (state.adminPassword.length < 4) {
+                        _uiState.update { it.copy(error = "Admin password must be at least 4 characters") }
+                        return
+                    }
+                    if (state.adminPassword != state.confirmAdminPassword) {
+                        _uiState.update { it.copy(error = "Admin passwords don't match") }
+                        return
+                    }
                 }
                 usedColorIndex = 1 // Admin uses first color
                 _uiState.update { it.copy(currentStep = 1, error = null) }
@@ -168,6 +190,12 @@ class SetupFamilyViewModel @Inject constructor(
                         colorHex = member.colorHex
                     )
                     userRepository.createUser(user, member.pin)
+                }
+
+                // Save admin password if provided
+                if (_uiState.value.adminPassword.isNotEmpty()) {
+                    val passwordHash = PasswordHasher.hash(_uiState.value.adminPassword)
+                    userPreferences.setAdminPassword(passwordHash)
                 }
 
                 // Mark first launch complete and log in admin

@@ -11,6 +11,8 @@ import com.example.planner.ui.screens.achievements.AchievementsScreen
 import com.example.planner.ui.screens.achievements.LeaderboardScreen
 import com.example.planner.ui.screens.auth.LoginScreen
 import com.example.planner.ui.screens.auth.SetupFamilyScreen
+import com.example.planner.ui.screens.auth.WelcomeScreen
+import com.example.planner.ui.screens.dashboard.child.ChildDashboardScreen
 import com.example.planner.ui.screens.calendar.CalendarScreen
 import com.example.planner.ui.screens.calendar.CreateEventScreen
 import com.example.planner.ui.screens.calendar.EventDetailScreen
@@ -36,15 +38,26 @@ fun PlannerNavHost(
         modifier = modifier
     ) {
         // Auth screens
+        composable(Screen.Welcome.route) {
+            WelcomeScreen(
+                onGetStarted = {
+                    navController.navigate(Screen.SetupFamily.route) {
+                        popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Screen.Dashboard.route) {
+                onLoginSuccess = { isAdmin ->
+                    val destination = if (isAdmin) Screen.Dashboard.route else Screen.ChildDashboard.route
+                    navController.navigate(destination) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onSetupFamily = {
-                    navController.navigate(Screen.SetupFamily.route)
+                    navController.navigate(Screen.Welcome.route)
                 }
             )
         }
@@ -72,6 +85,10 @@ fun PlannerNavHost(
                     navController.navigate(Screen.Tasks.route)
                 }
             )
+        }
+
+        composable(Screen.ChildDashboard.route) {
+            ChildDashboardScreen()
         }
 
         composable(Screen.Tasks.route) {

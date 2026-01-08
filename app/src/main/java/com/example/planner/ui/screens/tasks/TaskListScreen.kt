@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.planner.domain.model.UserRole
+import com.example.planner.ui.components.common.AdminPasswordDialog
 import com.example.planner.ui.components.common.EmptyStateView
 import com.example.planner.ui.components.common.LoadingIndicator
 import com.example.planner.ui.components.common.PlannerTopBar
@@ -35,13 +36,34 @@ fun TaskListScreen(
 
     val isAdmin = uiState.currentUser?.role == UserRole.ADMIN
 
+    // Admin password dialog
+    if (uiState.showPasswordDialog) {
+        AdminPasswordDialog(
+            onDismiss = { viewModel.dismissPasswordDialog() },
+            onConfirm = { password ->
+                viewModel.verifyAdminPassword(password) {
+                    onCreateTask()
+                }
+            },
+            isError = uiState.passwordError
+        )
+    }
+
     Scaffold(
         topBar = {
             PlannerTopBar(title = "Tasks")
         },
         floatingActionButton = {
             if (isAdmin) {
-                FloatingActionButton(onClick = onCreateTask) {
+                FloatingActionButton(
+                    onClick = {
+                        if (uiState.hasAdminPassword) {
+                            viewModel.onCreateTaskClicked()
+                        } else {
+                            onCreateTask()
+                        }
+                    }
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Create Task")
                 }
             }

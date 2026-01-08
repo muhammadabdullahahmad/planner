@@ -2,11 +2,13 @@ package com.example.planner.ui.navigation
 
 sealed class Screen(val route: String) {
     // Auth
+    object Welcome : Screen("welcome")
     object Login : Screen("login")
     object SetupFamily : Screen("setup_family")
 
     // Main (with bottom nav)
     object Dashboard : Screen("dashboard")
+    object ChildDashboard : Screen("child_dashboard")
     object Tasks : Screen("tasks")
     object Calendar : Screen("calendar")
     object Members : Screen("members")

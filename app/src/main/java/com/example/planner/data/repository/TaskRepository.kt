@@ -24,4 +24,6 @@ interface TaskRepository {
     suspend fun markCompletedByUser(taskId: Long, userId: Long)
     suspend fun getCompletedTaskCountForUser(userId: Long): Int
     fun getAssigneesForTask(taskId: Long): Flow<List<TaskAssigneeEntity>>
+    suspend fun startTask(taskId: Long)
+    suspend fun isCompletedByUser(taskId: Long, userId: Long): Boolean
 }

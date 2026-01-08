@@ -126,4 +126,15 @@ class TaskRepositoryImpl @Inject constructor(
     override fun getAssigneesForTask(taskId: Long): Flow<List<TaskAssigneeEntity>> {
         return taskDao.getAssigneesForTask(taskId)
     }
+
+    override suspend fun startTask(taskId: Long) {
+        val task = taskDao.getTaskById(taskId)
+        if (task?.status == TaskStatus.PENDING.name) {
+            taskDao.updateStatus(taskId, TaskStatus.IN_PROGRESS.name)
+        }
+    }
+
+    override suspend fun isCompletedByUser(taskId: Long, userId: Long): Boolean {
+        return taskDao.isCompletedByUser(taskId, userId) ?: false
+    }
 }

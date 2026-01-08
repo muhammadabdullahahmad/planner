@@ -41,6 +41,7 @@ fun FamilyPlannerApp() {
     // Determine if we should show bottom navigation
     val showBottomBar = currentRoute in listOf(
         Screen.Dashboard.route,
+        Screen.ChildDashboard.route,
         Screen.Tasks.route,
         Screen.Calendar.route,
         Screen.Members.route,

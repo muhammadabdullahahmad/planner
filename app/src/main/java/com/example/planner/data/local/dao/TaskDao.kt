@@ -88,4 +88,7 @@ interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM tasks t INNER JOIN task_assignees ta ON t.id = ta.taskId WHERE ta.userId = :userId AND t.status = 'COMPLETED'")
     suspend fun getCompletedTaskCountForUser(userId: Long): Int
+
+    @Query("SELECT completedByUser FROM task_assignees WHERE taskId = :taskId AND userId = :userId")
+    suspend fun isCompletedByUser(taskId: Long, userId: Long): Boolean?
 }
